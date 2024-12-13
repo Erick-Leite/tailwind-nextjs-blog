@@ -1,9 +1,10 @@
-import { sortPosts, allCoreContent } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
+import { useBlogPosts } from 'hooks/use-blog-posts'
 import Main from './Main'
 
+const PAGE_NUMBER = 1
+const POSTS_PER_PAGE = 5
+
 export default async function Page() {
-  const sortedPosts = sortPosts(allBlogs)
-  const posts = allCoreContent(sortedPosts)
-  return <Main posts={posts} />
+  const { posts, initialDisplayPosts, pagination } = useBlogPosts(PAGE_NUMBER, POSTS_PER_PAGE)
+  return <Main posts={posts} pagination={pagination} initialDisplayPosts={initialDisplayPosts} />
 }
