@@ -5,60 +5,19 @@ import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
+import type { PaginationProps } from '@/components/Pagination'
+import PostImage from '@/components/PostImage'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
+import Pagination from '@/components/Pagination'
 import siteMetadata from '@/data/siteMetadata'
 import tagData from 'app/tag-data.json'
 
-interface PaginationProps {
-  totalPages: number
-  currentPage: number
-}
 interface ListLayoutProps {
   posts: CoreContent<Blog>[]
   title: string
   initialDisplayPosts?: CoreContent<Blog>[]
   pagination?: PaginationProps
-}
-
-function Pagination({ totalPages, currentPage }: PaginationProps) {
-  const pathname = usePathname()
-  const basePath = pathname.split('/')[1]
-  const prevPage = currentPage - 1 > 0
-  const nextPage = currentPage + 1 <= totalPages
-
-  return (
-    <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-      <nav className="flex justify-between">
-        {!prevPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!prevPage}>
-            Previous
-          </button>
-        )}
-        {prevPage && (
-          <Link
-            href={currentPage - 1 === 1 ? `/${basePath}/` : `/${basePath}/page/${currentPage - 1}`}
-            rel="prev"
-          >
-            Previous
-          </Link>
-        )}
-        <span>
-          {currentPage} of {totalPages}
-        </span>
-        {!nextPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!nextPage}>
-            Next
-          </button>
-        )}
-        {nextPage && (
-          <Link href={`/${basePath}/page/${currentPage + 1}`} rel="next">
-            Next
-          </Link>
-        )}
-      </nav>
-    </div>
-  )
 }
 
 export default function ListLayoutWithTags({
@@ -121,32 +80,46 @@ export default function ListLayoutWithTags({
           <div>
             <ul>
               {displayPosts.map((post) => {
-                const { path, date, title, summary, tags } = post
+                const { path, date, images, title, summary, tags } = post
+                const postImageSrc = images && images[0] ? images[0] : null
                 return (
                   <li key={path} className="py-5">
-                    <article className="flex flex-col space-y-2 xl:space-y-0">
-                      <dl>
+                    <article className="grid xl:grid-cols-8 xl:gap-x-4">
+                      <dl className="xl:col-start-1 xl:col-end-4 xl:row-start-1 xl:pt-1">
                         <dt className="sr-only">Published on</dt>
-                        <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                        <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400 xl:text-center">
                           <time dateTime={date} suppressHydrationWarning>
                             {formatDate(date, siteMetadata.locale)}
                           </time>
                         </dd>
                       </dl>
-                      <div className="space-y-3">
-                        <div>
-                          <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link href={`/${path}`} className="text-gray-900 dark:text-gray-100">
-                              {title}
-                            </Link>
-                          </h2>
-                          <div className="flex flex-wrap">
-                            {tags?.map((tag) => <Tag key={tag} text={tag} />)}
-                          </div>
+                      {postImageSrc && (
+                        <Link
+                          href={`/${path}`}
+                          className="mt-3 grid xl:col-start-1 xl:col-end-4 xl:row-start-2 xl:row-end-5 xl:mt-2 xl:justify-center"
+                        >
+                          <PostImage
+                            src={postImageSrc}
+                            alt=""
+                            height={156}
+                            width={208}
+                            md={{ height: 150, width: 200 }}
+                            xl={{ height: 174, width: 232 }}
+                          />
+                        </Link>
+                      )}
+                      <div className="mt-3 xl:col-start-4 xl:col-end-9 xl:row-start-1 xl:row-end-3 xl:mt-0">
+                        <h2 className="text-2xl font-bold leading-8 tracking-tight">
+                          <Link href={`/${path}`} className="text-gray-900 dark:text-gray-100">
+                            {title}
+                          </Link>
+                        </h2>
+                        <div className="flex flex-wrap">
+                          {tags?.map((tag) => <Tag key={tag} text={tag} />)}
                         </div>
-                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                          {summary}
-                        </div>
+                      </div>
+                      <div className="prose mt-3 max-w-none text-gray-500 dark:text-gray-400 xl:col-start-4 xl:col-end-9 xl:row-start-3 xl:row-end-5">
+                        {summary}
                       </div>
                     </article>
                   </li>
